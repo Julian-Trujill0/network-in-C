@@ -39,13 +39,13 @@ SSL_CTX *create_context() {
 
 // Function to configure SSL context
 void configure_context(SSL_CTX *ctx) {
-    if (SSL_CTX_use_certificate_file(ctx, "server.crt", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_certificate_file(ctx, "ssl_certs/server.crt", SSL_FILETYPE_PEM) <= 0) {
         perror("Unable to load certificate file");
         ERR_print_errors_fp(stderr);
         exit(EXIT_FAILURE);
     }
 
-    if (SSL_CTX_use_PrivateKey_file(ctx, "server.key", SSL_FILETYPE_PEM) <= 0) {
+    if (SSL_CTX_use_PrivateKey_file(ctx, "ssl_certs/server.key", SSL_FILETYPE_PEM) <= 0) {
         perror("Unable to load private key file");
         ERR_print_errors_fp(stderr);
         exit(EXIT_FAILURE);
