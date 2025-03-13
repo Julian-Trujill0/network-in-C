@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <pthread.h>
 
 #define PORT 8080
 #define MAX_CLIENTS 5
@@ -58,10 +59,11 @@ void configure_context(SSL_CTX *ctx) {
 }
 
 // Function to handle client communication
-void handle_client(SSL *ssl) {
+void *handle_client(void *arg) {
+    SSL *ssl = (SSL *)arg;
     char buffer[BUFFER_SIZE];
     int bytes;
-    
+
     // Receive message from client
     bytes = SSL_read(ssl, buffer, sizeof(buffer));
     if (bytes <= 0) {
@@ -75,6 +77,8 @@ void handle_client(SSL *ssl) {
     }
     SSL_shutdown(ssl);
     SSL_free(ssl);
+
+    return NULL;
 }
 
 int main() {
@@ -83,6 +87,7 @@ int main() {
     socklen_t client_len = sizeof(client_addr);
     SSL_CTX *ctx;
     SSL *ssl;
+    pthread_t tid;
 
     // Initialize OpenSSL
     init_openssl();
@@ -131,12 +136,19 @@ int main() {
         // Perform SSL handshake
         if (SSL_accept(ssl) <= 0) {
             perror("SSL handshake failed");
+            SSL_free(ssl);
+            close(clientfd);
         } else {
-            // Handle communication with the client
-            handle_client(ssl);
-        }
+            // Create a new thread to handle communication with the client
+            if (pthread_create(&tid, NULL, handle_client, (void *)ssl) != 0) {
+                perror("Failed to create thread");
+                SSL_free(ssl);
+                close(clientfd);
+            }
 
-        close(clientfd);
+            // Detach the thread so that it cleans up automatically after execution
+            pthread_detach(tid);
+        }
     }
 
     // Clean up
@@ -146,4 +158,3 @@ int main() {
 
     return 0;
 }
-
