@@ -10,6 +10,7 @@
 #define PORT 8080
 #define BUFFER_SIZE 1024
 
+
 // Function to initialize OpenSSL
 void init_openssl() {
     SSL_load_error_strings();
