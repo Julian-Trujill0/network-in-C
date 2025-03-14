@@ -48,7 +48,7 @@ $(SSL_DIR):
 	mkdir -p $(SSL_DIR)
 
 # Build Server
-$(BIN_DIR)/server: $(OBJ_DIR)/server.o
+$(BIN_DIR)/server: $(OBJ_DIR)/server.o | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Build Client
